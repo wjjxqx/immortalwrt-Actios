@@ -1,0 +1,16 @@
+# 编译用的 shell 脚本必须保持 LF，否则 OpenWrt 构建时 bash 报 $'\r': command not found
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.py text eol=lf
+
+# buildsystem config 按原样存储，禁止行尾转换
+config/* -text
+.github/workflows/*.yml text eol=lf
+
+*.png binary
+*.jpg binary
+*.gz binary
+*.bin binary
+*.img binary
+*.dat binary

@@ -1,7 +1,7 @@
 #
 #
 
-name: 🚀 Build_imm_高通410系列
+name: 🚀 Build_imm_多平台
 
 on:
   repository_dispatch:
@@ -29,6 +29,8 @@ on:
           - wf2
           - sp970v11
           - sp970v10
+          - hyperv
+          - ghl-r-001
         default: ufi003
         required: true
       upstream:
@@ -95,6 +97,7 @@ jobs:
         sudo -E apt-get -y install $(curl -fsSL https://raw.githubusercontent.com/xuxin1955/depend_ubuntu2204_openwrt/refs/heads/main/depend_ubuntu2204_openwrt)
 
     - name: mkbootimg build
+      if: ${{ inputs.profile != 'hyperv' && inputs.profile != 'ghl-r-001' }}
       run: |
         wget https://github.com/xuxin1955/depend_ubuntu2204_openwrt/releases/download/ubuntu_26.04_LTS_mkbootimg/mkbootimg_34.0.5-12build1_all.deb
         sudo dpkg -i mkbootimg_34.0.5-12build1_all.deb
@@ -109,6 +112,8 @@ jobs:
         echo "❌ mkbootimg not found in PATH!"
         fi
 
+    - name: Set timezone and prep /mnt
+      run: |
         sudo timedatectl set-timezone "$TZ"
         sudo chmod 777 /mnt
         df -hT
@@ -315,23 +320,50 @@ jobs:
 
         # 创建刷机包目录并打包 zip
         mkdir -p flash_package
+        ZIP_NAME="OpenWrt_${PROFILE}${{ env.FILE_DATE }}_固件包.zip"
+
+        # ===== 按 target 分支：识别产物类型 =====
+        # 高通 msm8916 → boot.img + system.img（Android 分区镜像）
+        # x86/64       → combined.img / combined.vhdx / vmdk / qcow2（GRUB+grub2）
+        # ramips/mt7621→ *-squashfs-sysupgrade.bin（U-Boot/NAND sysupgrade）
         BOOT_IMG=$(ls *boot.img.gz *boot.img 2>/dev/null | head -1)
         SYSTEM_IMG=$(ls *system.img.gz *system.img 2>/dev/null | head -1)
-        if [ -z "$BOOT_IMG" ] || [ -z "$SYSTEM_IMG" ]; then
-          echo "::error::固件文件未找到，编译可能失败！当前目录文件："
-          ls -la
-          exit 1
+
+        if [ -n "$BOOT_IMG" ] && [ -n "$SYSTEM_IMG" ]; then
+          # ---------- 高通 msm8916：boot + system.img 刷机包 ----------
+          echo "PACKAGE_TYPE=qualcomm-boot-system" >> $GITHUB_ENV
+          echo ">>> 检测到高通 msm8916 产物：boot.img + system.img"
+          cp "$BOOT_IMG" flash_package/boot.img.gz
+          cp "$SYSTEM_IMG" flash_package/system.img.gz
+          # 解压供刷机脚本使用
+          gzip -dk flash_package/boot.img.gz
+          gzip -dk flash_package/system.img.gz
+          rm flash_package/boot.img.gz flash_package/system.img.gz
+          cp -r $GITHUB_WORKSPACE/刷机脚本/. flash_package/
+          # 确保 bat 文件是 CRLF 换行（Windows 兼容）
+          unix2dos flash_package/*.bat 2>/dev/null || sed -i 's/\r//' flash_package/*.bat && sed -i 's/$/\r/' flash_package/*.bat
+        else
+          # ---------- x86/64 与 ramips：通用固件包（不过滤，全量产物） ----------
+          echo ">>> 非高通产物，采用通用固件包（x86/64 或 ramips）"
+          # 收集所有固件产物与编译信息，排除 packages/ 子目录
+          for f in $(ls -1 | grep -vE '^packages$'); do
+            [ -f "$f" ] && cp -p "$f" flash_package/
+          done
+          # 高通刷机脚本仅适用于 msm89xx，其他 target 不打包
+          if [ -d "$GITHUB_WORKSPACE/刷机脚本" ]; then
+            echo ">>> 跳过刷机脚本（非高通 target）"
+          fi
+          # 校验：必须至少有一个固件产物
+          COUNT=$(ls -1 flash_package | wc -l)
+          if [ "$COUNT" -eq 0 ]; then
+            echo "::error::固件文件未找到，编译可能失败！当前目录文件："
+            ls -la
+            exit 1
+          fi
+          echo ">>> 已收集 $COUNT 个固件产物"
+          ls -lh flash_package
         fi
-        cp "$BOOT_IMG" flash_package/boot.img.gz
-        cp "$SYSTEM_IMG" flash_package/system.img.gz
-        # 解压供刷机脚本使用
-        gzip -dk flash_package/boot.img.gz
-        gzip -dk flash_package/system.img.gz
-        rm flash_package/boot.img.gz flash_package/system.img.gz
-        cp -r $GITHUB_WORKSPACE/刷机脚本/. flash_package/
-        # 确保 bat 文件是 CRLF 换行（Windows 兼容）
-        unix2dos flash_package/*.bat 2>/dev/null || sed -i 's/\r//' flash_package/*.bat && sed -i 's/$/\r/' flash_package/*.bat
-        ZIP_NAME="OpenWrt_${PROFILE}${{ env.FILE_DATE }}_刷机包.zip"
+
         cd flash_package && zip -r "../$ZIP_NAME" . && cd ..
 
         # 整理 release 目录：zip + 单独固件 + 编译信息
@@ -368,7 +400,7 @@ jobs:
         echo "release_tag=$(date +"%Y.%m.%d-%H%M")-${PROFILE}" >> $GITHUB_OUTPUT
         touch release.txt
         {
-          echo "## Immortalwrt master分支 高通410系列 · ${PROFILE}"
+          echo "## Immortalwrt master分支 · ${PROFILE}"
           echo ""
           echo "| 项目 | 信息 |"
           echo "|------|------|"
