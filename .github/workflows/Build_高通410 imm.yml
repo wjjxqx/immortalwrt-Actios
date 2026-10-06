@@ -254,7 +254,7 @@ jobs:
        make defconfig
        # 强制降级 GCC 版本，避免 musl __REDIR 兼容性问题
        sed -i '/^CONFIG_GCC_VERSION=/d' .config
-       echo 'CONFIG_GCC_VERSION="13.3.0"' >> .config
+       echo 'CONFIG_GCC_VERSION="13.4.0"' >> .config
        
     - name: Download package
       id: package
