@@ -158,56 +158,6 @@ jobs:
         fi
         ln -sf /mnt/openwrt $GITHUB_WORKSPACE/openwrt
 
-    - name: Patch musl __REDIR for GCC 13+/15+ compatibility
-      run: |
-        cd openwrt
-        # musl 1.2.6 defines __REDIR in features.h but several headers use __REDIR
-        # without including features.h first, causing GCC 13+/15+ build failures.
-        # Patch the affected headers to include features.h at the top.
-        mkdir -p toolchain/musl/patches
-        printf '%s\n' \
-          '--- a/include/sys/select.h' \
-          '+++ b/include/sys/select.h' \
-          '@@ -1,3 +1,4 @@' \
-          '+#include <features.h>' \
-          ' #if _REDIR_TIME64' \
-          ' __REDIR(select, __select_time64);' \
-          ' __REDIR(pselect, __pselect_time64);' \
-          '--- a/include/sys/time.h' \
-          '+++ b/include/sys/time.h' \
-          '@@ -1,3 +1,4 @@' \
-          '+#include <features.h>' \
-          ' #if _REDIR_TIME64' \
-          ' __REDIR(gettimeofday, __gettimeofday_time64);' \
-          '--- a/include/pthread.h' \
-          '+++ b/include/pthread.h' \
-          '@@ -1,3 +1,4 @@' \
-          '+#include <features.h>' \
-          ' #if _REDIR_TIME64' \
-          ' __REDIR(pthread_mutex_timedlock, __pthread_mutex_timedlock_time64);' \
-          '--- a/include/sched.h' \
-          '+++ b/include/sched.h' \
-          '@@ -1,3 +1,4 @@' \
-          '+#include <features.h>' \
-          ' #if _REDIR_TIME64' \
-          ' __REDIR(sched_rr_get_interval, __sched_rr_get_interval_time64);' \
-          '--- a/include/sys/timerfd.h' \
-          '+++ b/include/sys/timerfd.h' \
-          '@@ -1,3 +1,4 @@' \
-          '+#include <features.h>' \
-          ' #if _REDIR_TIME64' \
-          ' __REDIR(timerfd_settime, __timerfd_settime64);' \
-          '--- a/include/sys/timex.h' \
-          '+++ b/include/sys/timex.h' \
-          '@@ -1,3 +1,4 @@' \
-          '+#include <features.h>' \
-          ' #if _REDIR_TIME64' \
-          ' __REDIR(adjtimex, __adjtimex_time64);' \
-          > toolchain/musl/patches/001-fix-REDIR.patch
-        echo "Created musl __REDIR patch:"
-        cat toolchain/musl/patches/001-fix-REDIR.patch
-
-
     - name:  files
       run: cp -r files openwrt/files
 
