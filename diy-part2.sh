@@ -34,27 +34,28 @@ echo 'CONFIG_EXTRA_CFLAGS="-Wno-error=implicit-int"' >> .config
 echo 'CONFIG_EXTRA_HOST_CFLAGS="-Wno-error=implicit-int"' >> .config
 
 # 修复 Qt5 recursive dependency (qt5base-gui <-> OPENGLES2 choice)
-if [ -f feeds/video/frameworks/qt5/qt5base/Config.in ]; then
-  sed -i '/choice.*contains symbol PACKAGE_qt5base-gui/,/endchoice/{/endchoice/d; s/^choice/# REMOVED choice/; s/^endchoice/# REMOVED endchoice/}' feeds/video/frameworks/qt5/qt5base/Config.in || true
-fi
-# 额外移除 qt5 多余子包，避免递归依赖与重复安装
-if [ -f feeds/video/frameworks/qt5/qt5base/Config.in ]; then
-  sed -i '/PACKAGE_qt5base-gui/d' .config 2>/dev/null || true
-  sed -i '/PACKAGE_qt5base-plugin-input-evdevkeyboard/d' .config 2>/dev/null || true
-  sed -i '/PACKAGE_qt5base-plugin-input-libinput/d' .config 2>/dev/null || true
-  sed -i '/PACKAGE_qt5base-plugin-input-evdevmouse/d' .config 2>/dev/null || true
-  sed -i '/PACKAGE_qt5base-plugin-input-evdevtablet/d' .config 2>/dev/null || true
-  sed -i '/PACKAGE_qt5base-plugin-input-evdevtouch/d' .config 2>/dev/null || true
-  sed -i '/PACKAGE_qt5base-plugin-platforms-linuxfb/d' .config 2>/dev/null || true
-  sed -i '/PACKAGE_qt5base-plugin-platforms-vnc/d' .config 2>/dev/null || true
-  sed -i '/PACKAGE_qt5base-plugin-platforms-eglfs/d' .config 2>/dev/null || true
-fi
-if [ -f feeds/video/frameworks/qt5/qt5quick/Config.in ]; then
-  sed -i '/choice/d' feeds/video/frameworks/qt5/qt5quick/Config.in || true
-fi
-if [ -f feeds/video/frameworks/qt5/qt5script/Config.in ]; then
-  sed -i '/choice/,$d' feeds/video/frameworks/qt5/qt5script/Config.in || true
-fi
-if [ -f feeds/video/frameworks/qt5/qt5virtualkeyboard/Config.in ]; then
-  sed -i '/choice/,$d' feeds/video/frameworks/qt5/qt5virtualkeyboard/Config.in || true
-fi
+# 不在 Config.in 上 sed，只关闭 .config 中可能触发递归的 Qt5 子包
+disable_qt5_packages() {
+  local pkgs=(
+    PACKAGE_qt5base-gui
+    PACKAGE_qt5base-plugin-input-evdevkeyboard
+    PACKAGE_qt5base-plugin-input-libinput
+    PACKAGE_qt5base-plugin-input-evdevmouse
+    PACKAGE_qt5base-plugin-input-evdevtablet
+    PACKAGE_qt5base-plugin-input-evdevtouch
+    PACKAGE_qt5base-plugin-platforms-linuxfb
+    PACKAGE_qt5base-plugin-platforms-vnc
+    PACKAGE_qt5base-plugin-platforms-eglfs
+    PACKAGE_qt5quick
+    PACKAGE_qt5quick-controls
+    PACKAGE_qt5script
+    PACKAGE_qt5virtualkeyboard
+    PACKAGE_qt5graphicaleffects
+    PACKAGE_qt5tools
+    PACKAGE_qt5translations
+  )
+  for pkg in "${pkgs[@]}"; do
+    sed -i "/^${pkg}=/c\${pkg} is not set" .config 2>/dev/null || true
+  done
+}
+disable_qt5_packages
