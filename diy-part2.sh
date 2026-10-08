@@ -32,3 +32,10 @@ sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci/M
 # 该错误会导致 toolchain/gcc/final 阶段编译 libgcc 失败
 echo 'CONFIG_EXTRA_CFLAGS="-Wno-error=implicit-int"' >> .config
 echo 'CONFIG_EXTRA_HOST_CFLAGS="-Wno-error=implicit-int"' >> .config
+
+# 修复 Qt5 recursive dependency (qt5base-gui <-> OPENGLES2 choice)
+if [ -f feeds/video/frameworks/qt5/qt5base/Config.in ]; then
+  sed -i '/choice.*contains symbol PACKAGE_qt5base-gui/,/endchoice/{/endchoice/d; s/^choice/# REMOVED choice/; s/^endchoice/# REMOVED endchoice/}' feeds/video/frameworks/qt5/qt5base/Config.in || true
+  sed -i 's/^\s*choice/# REMOVED choice/' feeds/video/frameworks/qt5/qt5base/Config.in || true
+  sed -i 's/^CONFIG_PACKAGE_qt5base-gui=.*/CONFIG_PACKAGE_qt5base-gui is not set/' .config 2>/dev/null || true
+fi
