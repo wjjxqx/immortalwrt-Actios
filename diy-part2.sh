@@ -34,28 +34,18 @@ echo 'CONFIG_EXTRA_CFLAGS="-Wno-error=implicit-int"' >> .config
 echo 'CONFIG_EXTRA_HOST_CFLAGS="-Wno-error=implicit-int"' >> .config
 
 # 修复 Qt5 recursive dependency (qt5base-gui <-> OPENGLES2 choice)
-# 不在 Config.in 上 sed，只关闭 .config 中可能触发递归的 Qt5 子包
-disable_qt5_packages() {
-  local pkgs=(
-    PACKAGE_qt5base-gui
-    PACKAGE_qt5base-plugin-input-evdevkeyboard
-    PACKAGE_qt5base-plugin-input-libinput
-    PACKAGE_qt5base-plugin-input-evdevmouse
-    PACKAGE_qt5base-plugin-input-evdevtablet
-    PACKAGE_qt5base-plugin-input-evdevtouch
-    PACKAGE_qt5base-plugin-platforms-linuxfb
-    PACKAGE_qt5base-plugin-platforms-vnc
-    PACKAGE_qt5base-plugin-platforms-eglfs
-    PACKAGE_qt5quick
-    PACKAGE_qt5quick-controls
-    PACKAGE_qt5script
-    PACKAGE_qt5virtualkeyboard
-    PACKAGE_qt5graphicaleffects
-    PACKAGE_qt5tools
-    PACKAGE_qt5translations
-  )
-  for pkg in "${pkgs[@]}"; do
-    sed -i "/^${pkg}=/c\${pkg} is not set" .config 2>/dev/null || true
-  done
-}
-disable_qt5_packages
+# 在 feeds 更新后立即卸载 video feed 中的 Qt5 包，避免 defconfig 时触发递归
+if [ -d feeds/video/frameworks/qt5 ]; then
+  echo '>>> 移除 feeds/video 中全部 Qt5 包，避免 recursive dependency'
+  rm -rf feeds/video/frameworks/qt5 || true
+fi
+# 同时清理 .config 中可能残留的 Qt5 选项
+if [ -f .config ]; then
+  sed -i '/PACKAGE_qt5/d' .config 2>/dev/null || true
+  sed -i '/PACKAGE_qt5quick/d' .config 2>/dev/null || true
+  sed -i '/PACKAGE_qt5script/d' .config 2>/dev/null || true
+  sed -i '/PACKAGE_qt5virtualkeyboard/d' .config 2>/dev/null || true
+  sed -i '/PACKAGE_qt5graphicaleffects/d' .config 2>/dev/null || true
+  sed -i '/PACKAGE_qt5tools/d' .config 2>/dev/null || true
+  sed -i '/PACKAGE_qt5translations/d' .config 2>/dev/null || true
+fi
