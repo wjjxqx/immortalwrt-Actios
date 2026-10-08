@@ -27,3 +27,8 @@ sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci/M
 # git clone https://github.com/gSpotx2f/luci-app-cpu-status-mini package/luci-app-cpu-status-mini
 # git clone https://github.com/lkiuyu/luci-app-temp-status package/luci-app-temp-status
 # git clone https://github.com/lkiuyu/DbusSmsForwardCPlus package/DbusSmsForwardCPlus
+
+# 修复 GCC 15.2.0 + musl 1.2.5 的 __REDIR implicit-int 错误
+# 该错误会导致 toolchain/gcc/final 阶段编译 libgcc 失败
+echo 'CONFIG_EXTRA_CFLAGS="-Wno-error=implicit-int"' >> .config
+echo 'CONFIG_EXTRA_HOST_CFLAGS="-Wno-error=implicit-int"' >> .config
