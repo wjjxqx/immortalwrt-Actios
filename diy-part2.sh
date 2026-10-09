@@ -3,12 +3,10 @@
 # https://github.com/P3TERX/Actions-OpenWrt
 # 文件名: diy-part2.sh
 # 功能说明: OpenWrt DIY脚本第2部分（更新feeds之后）
-# 版权: (c) 2019-2024 P3TERX <https://p3terx.com>
-# 基于 MIT 开源协议，详见 /LICENSE
+# 版权: (c) 2019-2024 P3TERX  # 基于 MIT 开源协议，详见 /LICENSE
 
 # 修改默认IP地址
 #sed -i 's/192.168.1.1/192.168.100.1/g' package/base-files/files/bin/config_generate
-
 
 # 修改默认主题为 argon（路径不存在时跳过，不中断编译）
 sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci/Makefile 2>/dev/null || true
@@ -19,7 +17,6 @@ sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci/M
 #  grep -q 'CONFIG_IP_ADVANCED_ROUTER' "$cfg" || echo 'CONFIG_IP_ADVANCED_ROUTER=y' >> "$cfg"
 #  grep -q 'CONFIG_IP_MULTIPLE_TABLES' "$cfg" || echo 'CONFIG_IP_MULTIPLE_TABLES=y' >> "$cfg"
 #done
-
 
 # 临时添加的插件
 # git clone https://github.com/lkiuyu/luci-app-cpu-perf package/luci-app-cpu-perf
@@ -32,6 +29,9 @@ sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci/M
 # 该错误会导致 toolchain/gcc/final 阶段编译 libgcc 失败
 echo 'CONFIG_EXTRA_CFLAGS="-Wno-error=implicit-int"' >> .config
 echo 'CONFIG_EXTRA_HOST_CFLAGS="-Wno-error=implicit-int"' >> .config
+# Extend to toolchain build
+echo 'EXTRA_CFLAGS+=-Wno-error=implicit-int' >> .config
+echo 'EXTRA_HOST_CFLAGS+=-Wno-error=implicit-int' >> .config
 
 # 修复 Qt5 recursive dependency (qt5base-gui <-> OPENGLES2 choice)
 # 在 feeds 更新后立即卸载 video feed 中的 Qt5 包，避免 defconfig 时触发递归
@@ -48,4 +48,17 @@ if [ -f .config ]; then
   sed -i '/PACKAGE_qt5graphicaleffects/d' .config 2>/dev/null || true
   sed -i '/PACKAGE_qt5tools/d' .config 2>/dev/null || true
   sed -i '/PACKAGE_qt5translations/d' .config 2>/dev/null || true
+fi
+
+# Resolve package conflicts for x86/64 builds
+if [[ "${{ github.event.inputs.profile }}" == "hyperv" ]]; then
+    sed -i '/CONFIG_PACKAGE_kmod-nf-ipt/d' .config
+    sed -i '/CONFIG_PACKAGE_kmod-nf-ipt6/d' .config
+    sed -i '/CONFIG_PACKAGE_kmod-ipt-core/d' .config
+    sed -i '/CONFIG_PACKAGE_kmod-nft-compat/d' .config
+    sed -i '/CONFIG_PACKAGE_luci-app-mosdns/d' .config
+    sed -i '/CONFIG_PACKAGE_luci-i18n-mosdns-zh-cn/d' .config
+    sed -i '/CONFIG_PACKAGE_luci-app-tailscale/d' .config
+    sed -i '/CONFIG_PACKAGE_luci-i18n-tailscale-zh-cn/d' .config
+    sed -i '/CONFIG_PACKAGE_luci-i18n-tailscale-zh-tw/d' .config
 fi
