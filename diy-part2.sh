@@ -54,6 +54,14 @@ if [ -f .config ]; then
   sed -i '/PACKAGE_qt5translations/d' .config 2>/dev/null || true
 fi
 
+# Fix recursive dependency in luci-app-clashoo and luci-app-fchomo
+for pkg in luci-app-clashoo luci-app-fchomo; do
+    pkg_dir="package/feeds/smpackage/$pkg"
+    if [ -d "$pkg_dir" ]; then
+        echo ">>> Removing $pkg to avoid recursive dependency"
+        rm -rf "$pkg_dir"
+    fi
+done
 # Resolve package conflicts for x86/64 builds
 if [[ "${PROFILE}" == "hyperv" ]]; then
     sed -i '/CONFIG_PACKAGE_kmod-nf-ipt/d' .config
