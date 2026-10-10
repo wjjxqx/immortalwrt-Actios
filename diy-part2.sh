@@ -62,6 +62,11 @@ for pkg in luci-app-clashoo luci-app-fchomo; do
         rm -rf "$pkg_dir"
     fi
 done
+# Remove smpackage feed entirely to avoid recursive dependency issues
+if [ -d package/feeds/smpackage ]; then
+  echo ">>> Removing smpackage feed entirely"
+  rm -rf package/feeds/smpackage
+fi
 # Resolve package conflicts for x86/64 builds
 if [[ "${PROFILE}" == "hyperv" ]]; then
     sed -i '/CONFIG_PACKAGE_kmod-nf-ipt/d' .config
