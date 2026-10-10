@@ -45,19 +45,13 @@ if [ -d feeds/video/frameworks/qt5 ]; then
 fi
 # Fix self-dependency in package Makefiles (feeds and smpackage)
 find feeds/ -name "Makefile" -type f | while read makefile; do
-    if grep -q "DEPENDS:+=+\$(PKG_NAME)" "$makefile" || grep -q "DEPENDS:+=+\${PKG_NAME}" "$makefile"; then
-        echo ">>> Fixing self-dependency in $makefile"
-        sed -i '/DEPENDS:+=+\$(PKG_NAME)/d' "$makefile"
-        sed -i '/DEPENDS:+=+\${PKG_NAME}/d' "$makefile"
-    fi
+    # Remove self-dependency references: $(PKG_NAME) and ${PKG_NAME}
+    sed -i -e 's/\$(PKG_NAME)//g' -e 's/\${PKG_NAME}//g' "$makefile"
 done
 if [ -d package/feeds/smpackage ]; then
     find package/feeds/smpackage -name "Makefile" -type f | while read makefile; do
-        if grep -q "DEPENDS:+=+\$(PKG_NAME)" "$makefile" || grep -q "DEPENDS:+=+\${PKG_NAME}" "$makefile"; then
-            echo ">>> Fixing self-dependency in $makefile (smpackage)"
-            sed -i '/DEPENDS:+=+\$(PKG_NAME)/d' "$makefile"
-            sed -i '/DEPENDS:+=+\${PKG_NAME}/d' "$makefile"
-        fi
+        # Remove self-dependency references: $(PKG_NAME) and ${PKG_NAME}
+        sed -i -e 's/\$(PKG_NAME)//g' -e 's/\${PKG_NAME}//g' "$makefile"
     done
 fi
 # 同时清理 .config 中可能残留的 Qt5 选项
