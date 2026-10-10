@@ -43,6 +43,14 @@ if [ -d feeds/video/frameworks/qt5 ]; then
   echo '>>> 移除 feeds/video 中全部 Qt5 包，避免 recursive dependency'
   rm -rf feeds/video/frameworks/qt5 || true
 fi
+# Fix self-dependency in package Makefiles
+find feeds/ -name "Makefile" -type f | while read makefile; do
+    if grep -q "DEPENDS:=+\$(PKG_NAME)" "$makefile" || grep -q "DEPENDS:=+${PKG_NAME}" "$makefile"; then
+        echo ">>> Fixing self-dependency in $makefile"
+        sed -i '/DEPENDS:=+\$(PKG_NAME)/d' "$makefile"
+        sed -i '/DEPENDS:=+${PKG_NAME}/d' "$makefile"
+    fi
+done
 # 同时清理 .config 中可能残留的 Qt5 选项
 if [ -f .config ]; then
   sed -i '/PACKAGE_qt5/d' .config 2>/dev/null || true
