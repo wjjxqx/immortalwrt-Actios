@@ -1,4 +1,4 @@
-﻿#
+#
 #
 
 name: 馃殌 Build_imm_澶氬钩鍙?
@@ -162,10 +162,26 @@ jobs:
 
     - name: Load custom feeds
       run: |
-        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        chmod +x $DIY_P1_SH
+        echo "FEEDS_CONF=$FEEDS_CONF"
+        echo "DIY_P1_SH=$DIY_P1_SH"
+        echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+        if [ -e "$FEEDS_CONF" ]; then
+          echo "FEEDS_CONF exists, copying to openwrt/feeds.conf.default"
+          mkdir -p openwrt
+          cp "$FEEDS_CONF" openwrt/feeds.conf.default
+          echo "Copied feeds.conf"
+        else
+          echo "WARNING: FEEDS_CONF not found at $FEEDS_CONF"
+        fi
+        if [ -x "$GITHUB_WORKSPACE/$DIY_P1_SH" ]; then
+          echo "DIY_P1_SH is executable"
+        else
+          echo "DIY_P1_SH not executable, fixing"
+          chmod +x "$GITHUB_WORKSPACE/$DIY_P1_SH"
+        fi
+        echo "Running DIY_P1_SH from $GITHUB_WORKSPACE/$DIY_P1_SH"
         cd openwrt
-        $GITHUB_WORKSPACE/$DIY_P1_SH
+        "$GITHUB_WORKSPACE/$DIY_P1_SH"
         
 
     - name: Update feeds
