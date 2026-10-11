@@ -1,18 +1,18 @@
-#
+﻿#
 #
 
-name: 🚀 Build_imm_多平�?
+name: 馃殌 Build_imm_澶氬钩鍙?
 on:
   repository_dispatch:
   workflow_dispatch:
     inputs:
       ssh:
-        description: ' �?选择是否开�?SSH 调试专业人员使用'
+        description: ' 鈫?閫夋嫨鏄惁寮€鍚?SSH 璋冭瘯涓撲笟浜哄憳浣跨敤'
         required: false
         default: false
         type: boolean
       profile:
-        description: ' �?支持多款型号 手动选择要编译的机型 �?'
+        description: ' 鈫?鏀寔澶氭鍨嬪彿 鎵嬪姩閫夋嫨瑕佺紪璇戠殑鏈哄瀷 鈫?'
         type: choice
         options:
           - ufi003
@@ -33,25 +33,25 @@ on:
         default: ufi003
         required: true
       upstream:
-        description: ' �?选择上游源码仓库 �?'
+        description: ' 鈫?閫夋嫨涓婃父婧愮爜浠撳簱 鈫?'
         type: choice
         options:
           - lkiuyu/immortalwrt
         default: lkiuyu/immortalwrt
         required: true
       custom_hash:
-        description: ' �?指定 hash（默认不用填写）�?'
+        description: ' 鈫?鎸囧畾 hash锛堥粯璁や笉鐢ㄥ～鍐欙級鈫?'
         required: false
         default: ''
         type: string
       extra_packages:
-        description: ' �?输入额外包名（逗号或空格分隔，留空则不添加任何额外包）�?'
+        description: ' 鈫?杈撳叆棰濆鍖呭悕锛堥€楀彿鎴栫┖鏍煎垎闅旓紝鐣欑┖鍒欎笉娣诲姞浠讳綍棰濆鍖咃級鈫?'
         required: false
         default: ''
         type: string
 
 env:
-  REPO_URL: https://github.com/${{ github.event.inputs.upstream }}
+  REPO_URL: https://github.com/${{ github.event.inputs.upstream || github.event.client_payload.upstream || 'lkiuyu/immortalwrt' }}
   REPO_BRANCH: master
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: ${{ format('config/{0}.config', github.event.inputs.profile) }}
@@ -69,7 +69,7 @@ jobs:
       contents: write
       actions: write
     steps:
-    - name: 🚀 编译 (Build)
+    - name: 馃殌 缂栬瘧 (Build)
       uses: actions/checkout@main
 
     - name: Show hardware info
@@ -101,14 +101,14 @@ jobs:
         wget https://github.com/xuxin1955/depend_ubuntu2204_openwrt/releases/download/ubuntu_26.04_LTS_mkbootimg/mkbootimg_34.0.5-12build1_all.deb
         sudo dpkg -i mkbootimg_34.0.5-12build1_all.deb
         sudo apt-get install -f -y
-        # 验证安装
+        # 楠岃瘉瀹夎
         mkbootimg --help || true
         MKBOOTIMG_PATH=$(which mkbootimg)
         if [ -n "$MKBOOTIMG_PATH" ]; then
         echo "mkbootimg found at: $MKBOOTIMG_PATH"
         file "$MKBOOTIMG_PATH"
         else
-        echo "�?mkbootimg not found in PATH!"
+        echo "鉂?mkbootimg not found in PATH!"
         fi
 
     - name: Set timezone and prep /mnt
@@ -130,21 +130,21 @@ jobs:
 
 
 
-    - name: 读取锁定的上�?hash (Read locked upstream hash)
+    - name: 璇诲彇閿佸畾鐨勪笂娓?hash (Read locked upstream hash)
       id: lock
       run: |
         CUSTOM_HASH="${{ github.event.inputs.custom_hash }}"
         LOCK_FILE="upstream_lock.txt"
         if [ -n "$CUSTOM_HASH" ]; then
           echo "locked_hash=$CUSTOM_HASH" >> $GITHUB_OUTPUT
-          echo "使用用户指定 hash: $CUSTOM_HASH"
+          echo "浣跨敤鐢ㄦ埛鎸囧畾 hash: $CUSTOM_HASH"
         elif [ -f "$LOCK_FILE" ]; then
           HASH=$(cat $LOCK_FILE)
           echo "locked_hash=$HASH" >> $GITHUB_OUTPUT
-          echo "使用锁定 hash: $HASH"
+          echo "浣跨敤閿佸畾 hash: $HASH"
         else
           echo "locked_hash=" >> $GITHUB_OUTPUT
-          echo "upstream_lock.txt 不存在，使用最�?master"
+          echo "upstream_lock.txt 涓嶅瓨鍦紝浣跨敤鏈€鏂?master"
         fi
 
     - name: Clone source code
@@ -173,7 +173,7 @@ jobs:
 
     - name: Remove conflicting packages from smpackage
       run: |
-        # 删除 small-package 中与系统冲突的包，避免编译报错（官方推荐操作�?        rm -rf openwrt/feeds/smpackage/{base-files,dnsmasq,firewall*,fullconenat,libnftnl,nftables,ppp,opkg,ucl,upx,vsftpd*,miniupnpd-iptables,wireless-regdb}
+        # 鍒犻櫎 small-package 涓笌绯荤粺鍐茬獊鐨勫寘锛岄伩鍏嶇紪璇戞姤閿欙紙瀹樻柟鎺ㄨ崘鎿嶄綔锛?        rm -rf openwrt/feeds/smpackage/{base-files,dnsmasq,firewall*,fullconenat,libnftnl,nftables,ppp,opkg,ucl,upx,vsftpd*,miniupnpd-iptables,wireless-regdb}
 
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a -f
@@ -195,29 +195,29 @@ jobs:
         echo "${{ inputs.extra_packages }}"
         echo "=========================================="
 
-        # 提取系统设置参数（__ip__ �?__hostname__ 前缀�?        RAW='${{ inputs.extra_packages }}'
+        # 鎻愬彇绯荤粺璁剧疆鍙傛暟锛坃_ip__ 鍜?__hostname__ 鍓嶇紑锛?        RAW='${{ inputs.extra_packages }}'
         CUSTOM_IP=$(echo "$RAW" | grep -oP '(?<=__ip__)[^,\s]+' || true)
         CUSTOM_HOSTNAME=$(echo "$RAW" | grep -oP '(?<=__hostname__)[^,\s]+' || true)
 
-        # 应用自定�?IP
+        # 搴旂敤鑷畾涔?IP
         if [ -n "$CUSTOM_IP" ]; then
-          echo "🌐 设置管理 IP: $CUSTOM_IP"
+          echo "馃寪 璁剧疆绠＄悊 IP: $CUSTOM_IP"
           sed -i "s/192\.168\.1\.1/$CUSTOM_IP/g" package/base-files/files/bin/config_generate
         fi
 
-        # 应用自定义主机名
+        # 搴旂敤鑷畾涔変富鏈哄悕
         if [ -n "$CUSTOM_HOSTNAME" ]; then
-          echo "🏷�?设置主机�? $CUSTOM_HOSTNAME"
+          echo "馃彿锔?璁剧疆涓绘満鍚? $CUSTOM_HOSTNAME"
           sed -i "s/set system\.@system\[0\]\.hostname='ImmortalWrt'/set system.@system[0].hostname='$CUSTOM_HOSTNAME'/" package/base-files/files/bin/config_generate || true
           sed -i "s/option hostname 'ImmortalWrt'/option hostname '$CUSTOM_HOSTNAME'/" package/base-files/files/etc/config/system 2>/dev/null || true
         fi
 
-        # 过滤掉特殊前缀，只处理真正的包�?        PACKAGES=$(echo "$RAW" | sed 's/,/ /g' | tr ' ' '\n' | grep -v '^__ip__' | grep -v '^__hostname__' | tr '\n' ' ')
+        # 杩囨护鎺夌壒娈婂墠缂€锛屽彧澶勭悊鐪熸鐨勫寘鍚?        PACKAGES=$(echo "$RAW" | sed 's/,/ /g' | tr ' ' '\n' | grep -v '^__ip__' | grep -v '^__hostname__' | tr '\n' ' ')
 
-        # 检测是否选了 turboacc，如果选了则先执行安装脚本
+        # 妫€娴嬫槸鍚﹂€変簡 turboacc锛屽鏋滈€変簡鍒欏厛鎵ц瀹夎鑴氭湰
         if echo "$PACKAGES" | grep -qw "luci-app-turboacc"; then
-          echo "�?检测到 luci-app-turboacc，执�?turboacc 安装脚本..."
-          curl -sSL https://raw.githubusercontent.com/mufeng05/turboacc/main/add_turboacc.sh -o add_turboacc.sh && bash add_turboacc.sh || echo "⚠️ turboacc 脚本执行失败，跳�?
+          echo "鈿?妫€娴嬪埌 luci-app-turboacc锛屾墽琛?turboacc 瀹夎鑴氭湰..."
+          curl -sSL https://raw.githubusercontent.com/mufeng05/turboacc/main/add_turboacc.sh -o add_turboacc.sh && bash add_turboacc.sh || echo "鈿狅笍 turboacc 鑴氭湰鎵ц澶辫触锛岃烦杩?
         fi
 
         for pkg in $PACKAGES; do
@@ -225,19 +225,19 @@ jobs:
             CFG="CONFIG_PACKAGE_${pkg}"
             if grep -q "^# ${CFG} is not set" .config; then
               sed -i "s/^# ${CFG} is not set$/${CFG}=y/" .config
-              echo "�?Enabled (replaced): ${CFG}=y"
+              echo "鉁?Enabled (replaced): ${CFG}=y"
             elif grep -q "^${CFG}=" .config; then
               sed -i "s/^${CFG}=.*$/${CFG}=y/" .config
-              echo "�?Enabled (updated): ${CFG}=y"
+              echo "鉁?Enabled (updated): ${CFG}=y"
             else
               echo "${CFG}=y" >> .config
-              echo "�?Enabled (appended): ${CFG}=y"
+              echo "鉁?Enabled (appended): ${CFG}=y"
             fi
           fi
         done
         
         
-    - name: SSH 调试有效时间6h! 连接后输入q 输入exit即可退出，自动继续后续编译流程
+    - name: SSH 璋冭瘯鏈夋晥鏃堕棿6h! 杩炴帴鍚庤緭鍏 杈撳叆exit鍗冲彲閫€鍑猴紝鑷姩缁х画鍚庣画缂栬瘧娴佺▼
       uses: mxschmitt/action-tmate@master
       if: ${{ inputs.ssh || contains(github.event.action, 'ssh') }}
       
@@ -247,9 +247,9 @@ jobs:
       run: |
        cd openwrt
        make defconfig
-       # 强制降级 GCC 版本，避�?musl __REDIR 兼容性问�?       sed -i '/^CONFIG_GCC_VERSION=/d' .config
+       # 寮哄埗闄嶇骇 GCC 鐗堟湰锛岄伩鍏?musl __REDIR 鍏煎鎬ч棶棰?       sed -i '/^CONFIG_GCC_VERSION=/d' .config
        echo 'CONFIG_GCC_VERSION="15.2.0"' >> .config
-       # 禁用 musl __REDIR 宏触发的 implicit-int 错误
+       # 绂佺敤 musl __REDIR 瀹忚Е鍙戠殑 implicit-int 閿欒
        echo 'CONFIG_TARGET_CFLAGS="-Wno-error=implicit-int"' >> .config
        
     - name: Download package
@@ -260,7 +260,7 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: 查看 openwrt 目录
+    - name: 鏌ョ湅 openwrt 鐩綍
       run: ls -la openwrt/
       
            ls -l .config
@@ -268,7 +268,7 @@ jobs:
            ls -la openwrt/.config
 
  
-    - name: 自动上传最新源码生�?config编译配置
+    - name: 鑷姩涓婁紶鏈€鏂版簮鐮佺敓鎴?config缂栬瘧閰嶇疆
       uses: actions/upload-artifact@main
       with:
        name: build-config
@@ -291,7 +291,7 @@ jobs:
 
     - name: Get kernel version
       run: |
-        KERNEL_VER=$(cat /mnt/openwrt/build_dir/target-*/linux-*/linux-*/.kernelversion 2>/dev/null | head -1 || echo "未知")
+        KERNEL_VER=$(cat /mnt/openwrt/build_dir/target-*/linux-*/linux-*/.kernelversion 2>/dev/null | head -1 || echo "鏈煡")
         echo "KERNEL_VER=$KERNEL_VER" >> $GITHUB_ENV
 
 
@@ -317,47 +317,47 @@ jobs:
         rm -rf packages
         PROFILE=${{ github.event.inputs.profile }}
 
-        # 创建刷机包目录并打包 zip
+        # 鍒涘缓鍒锋満鍖呯洰褰曞苟鎵撳寘 zip
         mkdir -p flash_package
-        ZIP_NAME="OpenWrt_${PROFILE}${{ env.FILE_DATE }}_固件�?zip"
+        ZIP_NAME="OpenWrt_${PROFILE}${{ env.FILE_DATE }}_鍥轰欢鍖?zip"
 
-        # ===== �?target 分支：识别产物类�?=====
-        # 高�?msm8916 �?boot.img + system.img（Android 分区镜像�?        # x86/64       �?combined.img / combined.vhdx / vmdk / qcow2（GRUB+grub2�?        # ramips/mt7621�?*-squashfs-sysupgrade.bin（U-Boot/NAND sysupgrade�?        BOOT_IMG=$(ls *boot.img.gz *boot.img 2>/dev/null | head -1)
+        # ===== 鎸?target 鍒嗘敮锛氳瘑鍒骇鐗╃被鍨?=====
+        # 楂橀€?msm8916 鈫?boot.img + system.img锛圓ndroid 鍒嗗尯闀滃儚锛?        # x86/64       鈫?combined.img / combined.vhdx / vmdk / qcow2锛圙RUB+grub2锛?        # ramips/mt7621鈫?*-squashfs-sysupgrade.bin锛圲-Boot/NAND sysupgrade锛?        BOOT_IMG=$(ls *boot.img.gz *boot.img 2>/dev/null | head -1)
         SYSTEM_IMG=$(ls *system.img.gz *system.img 2>/dev/null | head -1)
 
         if [ -n "$BOOT_IMG" ] && [ -n "$SYSTEM_IMG" ]; then
-          # ---------- 高�?msm8916：boot + system.img 刷机�?----------
+          # ---------- 楂橀€?msm8916锛歜oot + system.img 鍒锋満鍖?----------
           echo "PACKAGE_TYPE=qualcomm-boot-system" >> $GITHUB_ENV
-          echo ">>> 检测到高�?msm8916 产物：boot.img + system.img"
+          echo ">>> 妫€娴嬪埌楂橀€?msm8916 浜х墿锛歜oot.img + system.img"
           cp "$BOOT_IMG" flash_package/boot.img.gz
           cp "$SYSTEM_IMG" flash_package/system.img.gz
-          # 解压供刷机脚本使�?          gzip -dk flash_package/boot.img.gz
+          # 瑙ｅ帇渚涘埛鏈鸿剼鏈娇鐢?          gzip -dk flash_package/boot.img.gz
           gzip -dk flash_package/system.img.gz
           rm flash_package/boot.img.gz flash_package/system.img.gz
-          cp -r $GITHUB_WORKSPACE/刷机脚本/. flash_package/
-          # 确保 bat 文件�?CRLF 换行（Windows 兼容�?          unix2dos flash_package/*.bat 2>/dev/null || sed -i 's/\r//' flash_package/*.bat && sed -i 's/$/\r/' flash_package/*.bat
+          cp -r $GITHUB_WORKSPACE/鍒锋満鑴氭湰/. flash_package/
+          # 纭繚 bat 鏂囦欢鏄?CRLF 鎹㈣锛圵indows 鍏煎锛?          unix2dos flash_package/*.bat 2>/dev/null || sed -i 's/\r//' flash_package/*.bat && sed -i 's/$/\r/' flash_package/*.bat
         else
-          # ---------- x86/64 �?ramips：通用固件包（不过滤，全量产物�?----------
-          echo ">>> 非高通产物，采用通用固件包（x86/64 �?ramips�?
-          # 收集所有固件产物与编译信息，排�?packages/ 子目�?          for f in $(ls -1 | grep -vE '^packages$'); do
+          # ---------- x86/64 涓?ramips锛氶€氱敤鍥轰欢鍖咃紙涓嶈繃婊わ紝鍏ㄩ噺浜х墿锛?----------
+          echo ">>> 闈為珮閫氫骇鐗╋紝閲囩敤閫氱敤鍥轰欢鍖咃紙x86/64 鎴?ramips锛?
+          # 鏀堕泦鎵€鏈夊浐浠朵骇鐗╀笌缂栬瘧淇℃伅锛屾帓闄?packages/ 瀛愮洰褰?          for f in $(ls -1 | grep -vE '^packages$'); do
             [ -f "$f" ] && cp -p "$f" flash_package/
           done
-          # 高通刷机脚本仅适用�?msm89xx，其�?target 不打�?          if [ -d "$GITHUB_WORKSPACE/刷机脚本" ]; then
-            echo ">>> 跳过刷机脚本（非高�?target�?
+          # 楂橀€氬埛鏈鸿剼鏈粎閫傜敤浜?msm89xx锛屽叾浠?target 涓嶆墦鍖?          if [ -d "$GITHUB_WORKSPACE/鍒锋満鑴氭湰" ]; then
+            echo ">>> 璺宠繃鍒锋満鑴氭湰锛堥潪楂橀€?target锛?
           fi
-          # 校验：必须至少有一个固件产�?          COUNT=$(ls -1 flash_package | wc -l)
+          # 鏍￠獙锛氬繀椤昏嚦灏戞湁涓€涓浐浠朵骇鐗?          COUNT=$(ls -1 flash_package | wc -l)
           if [ "$COUNT" -eq 0 ]; then
-            echo "::error::固件文件未找到，编译可能失败！当前目录文件："
+            echo "::error::鍥轰欢鏂囦欢鏈壘鍒帮紝缂栬瘧鍙兘澶辫触锛佸綋鍓嶇洰褰曟枃浠讹細"
             ls -la
             exit 1
           fi
-          echo ">>> 已收�?$COUNT 个固件产�?
+          echo ">>> 宸叉敹闆?$COUNT 涓浐浠朵骇鐗?
           ls -lh flash_package
         fi
 
         cd flash_package && zip -r "../$ZIP_NAME" . && cd ..
 
-        # 整理 release 目录：zip + 单独固件 + 编译信息
+        # 鏁寸悊 release 鐩綍锛歾ip + 鍗曠嫭鍥轰欢 + 缂栬瘧淇℃伅
         mkdir -p release_files
         mv "$ZIP_NAME" release_files/
         cp *.manifest release_files/ 2>/dev/null || true
@@ -379,35 +379,35 @@ jobs:
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
         PROFILE=${{ github.event.inputs.profile }}
-        # 提取用户设置�?IP 和主机名
+        # 鎻愬彇鐢ㄦ埛璁剧疆鐨?IP 鍜屼富鏈哄悕
         RAW='${{ inputs.extra_packages }}'
         CUSTOM_IP=$(echo "$RAW" | grep -oP '(?<=__ip__)[^,\s]+' || true)
         CUSTOM_HOSTNAME=$(echo "$RAW" | grep -oP '(?<=__hostname__)[^,\s]+' || true)
         DISPLAY_IP=${CUSTOM_IP:-192.168.1.1}
         DISPLAY_HOSTNAME=${CUSTOM_HOSTNAME:-ImmortalWrt}
-        # 过滤掉特殊前缀，只显示真正的包�?        EXTRA=$(echo "$RAW" | sed 's/,/ /g' | tr ' ' '\n' | grep -v '^__ip__' | grep -v '^__hostname__' | sed '/^$/d')
+        # 杩囨护鎺夌壒娈婂墠缂€锛屽彧鏄剧ず鐪熸鐨勫寘鍚?        EXTRA=$(echo "$RAW" | sed 's/,/ /g' | tr ' ' '\n' | grep -v '^__ip__' | grep -v '^__hostname__' | sed '/^$/d')
 
         echo "release_tag=$(date +"%Y.%m.%d-%H%M")-${PROFILE}" >> $GITHUB_OUTPUT
         touch release.txt
         {
-          echo "## Immortalwrt master分支 · ${PROFILE}"
+          echo "## Immortalwrt master鍒嗘敮 路 ${PROFILE}"
           echo ""
-          echo "| 项目 | 信息 |"
+          echo "| 椤圭洰 | 淇℃伅 |"
           echo "|------|------|"
-          echo "| 编译�?| ${{ github.actor }} |"
-          echo "| 机型 | ${PROFILE} |"
-          echo "| 内核版本 | ${{ env.KERNEL_VER }} |"
-          echo "| 管理地址 | ${DISPLAY_IP} |"
-          echo "| 主机�?| ${DISPLAY_HOSTNAME} |"
-          echo "| 默认用户 | root |"
-          echo "| 默认密码 | �?|"
+          echo "| 缂栬瘧鑰?| ${{ github.actor }} |"
+          echo "| 鏈哄瀷 | ${PROFILE} |"
+          echo "| 鍐呮牳鐗堟湰 | ${{ env.KERNEL_VER }} |"
+          echo "| 绠＄悊鍦板潃 | ${DISPLAY_IP} |"
+          echo "| 涓绘満鍚?| ${DISPLAY_HOSTNAME} |"
+          echo "| 榛樿鐢ㄦ埛 | root |"
+          echo "| 榛樿瀵嗙爜 | 绌?|"
           echo ""
           if [ -n "$EXTRA" ]; then
-            echo "### 额外添加的包"
+            echo "### 棰濆娣诲姞鐨勫寘"
             echo "$EXTRA" | sed 's/^/- /'
           else
-            echo "### 额外添加的包"
-            echo "�?
+            echo "### 棰濆娣诲姞鐨勫寘"
+            echo "鏃?
           fi
         } >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
