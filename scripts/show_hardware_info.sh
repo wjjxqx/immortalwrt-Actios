@@ -1,2 +1,7 @@
-#!/bin/bash 
-echo "Hardware info:"  echo lscpu  echo echo "Memory info:"  echo free -h  echo echo "Disk info:"  echo df -h 
+'#!/bin/bash' 
+'echo "Hardware info:"' 
+'lscpu' 
+'echo "Memory info:"' 
+'free -h' 
+'echo "Disk info:"' 
+'df -h' 

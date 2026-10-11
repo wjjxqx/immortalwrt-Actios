@@ -1,4 +1,21 @@
 #
+
+        fi
+
+      run: |
+        ls -la openwrt/
+        ls -l .config
+        ls -la openwrt/.config
+
+#
+
+
+      run: |
+        ls -la openwrt/
+        ls -l .config
+        ls -la openwrt/.config
+
+#
 #
 
 name: 馃殌 Build_imm_澶氬钩鍙?
@@ -7,12 +24,12 @@ on:
   workflow_dispatch:
     inputs:
       ssh:
-        description: ' 鈫?閫夋嫨鏄惁寮€鍚?SSH 璋冭瘯涓撲笟浜哄憳浣跨敤'
+        description: ' �?閫夋嫨鏄惁寮€�?SSH 璋冭瘯涓撲笟浜哄憳浣跨敤'
         required: false
         default: false
         type: boolean
       profile:
-        description: ' 鈫?鏀寔澶氭鍨嬪彿 鎵嬪姩閫夋嫨瑕佺紪璇戠殑鏈哄瀷 鈫?'
+        description: ' �?鏀寔澶氭鍨嬪彿 鎵嬪姩閫夋嫨瑕佺紪璇戠殑鏈哄�?�?'
         type: choice
         options:
           - ufi003
@@ -33,19 +50,19 @@ on:
         default: ufi003
         required: true
       upstream:
-        description: ' 鈫?閫夋嫨涓婃父婧愮爜浠撳簱 鈫?'
+        description: ' �?閫夋嫨涓婃父婧愮爜浠撳簱 �?'
         type: choice
         options:
           - lkiuyu/immortalwrt
         default: lkiuyu/immortalwrt
         required: true
       custom_hash:
-        description: ' 鈫?鎸囧畾 hash锛堥粯璁や笉鐢ㄥ～鍐欙級鈫?'
+        description: ' �?鎸囧�?hash锛堥粯璁や笉鐢ㄥ～鍐欙級�?'
         required: false
         default: ''
         type: string
       extra_packages:
-        description: ' 鈫?杈撳叆棰濆鍖呭悕锛堥€楀彿鎴栫┖鏍煎垎闅旓紝鐣欑┖鍒欎笉娣诲姞浠讳綍棰濆鍖咃級鈫?'
+        description: ' �?杈撳叆棰濆鍖呭悕锛堥€楀彿鎴栫┖鏍煎垎闅旓紝鐣欑┖鍒欎笉娣诲姞浠讳綍棰濆鍖咃級�?'
         required: false
         default: ''
         type: string
@@ -69,7 +86,7 @@ jobs:
       contents: write
       actions: write
     steps:
-    - name: 馃殌 缂栬瘧 (Build)
+    - name: 馃殌 缂栬�?(Build)
       uses: actions/checkout@main
 
     - name: Show hardware info
@@ -101,14 +118,14 @@ jobs:
         wget https://github.com/xuxin1955/depend_ubuntu2204_openwrt/releases/download/ubuntu_26.04_LTS_mkbootimg/mkbootimg_34.0.5-12build1_all.deb
         sudo dpkg -i mkbootimg_34.0.5-12build1_all.deb
         sudo apt-get install -f -y
-        # 楠岃瘉瀹夎
+        # 楠岃瘉瀹夎�?
         mkbootimg --help || true
         MKBOOTIMG_PATH=$(which mkbootimg)
         if [ -n "$MKBOOTIMG_PATH" ]; then
         echo "mkbootimg found at: $MKBOOTIMG_PATH"
         file "$MKBOOTIMG_PATH"
         else
-        echo "鉂?mkbootimg not found in PATH!"
+        echo "�?mkbootimg not found in PATH!"
         fi
 
     - name: Set timezone and prep /mnt
@@ -137,7 +154,7 @@ jobs:
         LOCK_FILE="upstream_lock.txt"
         if [ -n "$CUSTOM_HASH" ]; then
           echo "locked_hash=$CUSTOM_HASH" >> $GITHUB_OUTPUT
-          echo "浣跨敤鐢ㄦ埛鎸囧畾 hash: $CUSTOM_HASH"
+          echo "浣跨敤鐢ㄦ埛鎸囧�?hash: $CUSTOM_HASH"
         elif [ -f "$LOCK_FILE" ]; then
           HASH=$(cat $LOCK_FILE)
           echo "locked_hash=$HASH" >> $GITHUB_OUTPUT
@@ -189,7 +206,7 @@ jobs:
 
     - name: Remove conflicting packages from smpackage
       run: |
-        # 鍒犻櫎 small-package 涓笌绯荤粺鍐茬獊鐨勫寘锛岄伩鍏嶇紪璇戞姤閿欙紙瀹樻柟鎺ㄨ崘鎿嶄綔锛?        rm -rf openwrt/feeds/smpackage/{base-files,dnsmasq,firewall*,fullconenat,libnftnl,nftables,ppp,opkg,ucl,upx,vsftpd*,miniupnpd-iptables,wireless-regdb}
+        # 鍒犻�?small-package 涓笌绯荤粺鍐茬獊鐨勫寘锛岄伩鍏嶇紪璇戞姤閿欙紙瀹樻柟鎺ㄨ崘鎿嶄綔锛?        rm -rf openwrt/feeds/smpackage/{base-files,dnsmasq,firewall*,fullconenat,libnftnl,nftables,ppp,opkg,ucl,upx,vsftpd*,miniupnpd-iptables,wireless-regdb}
 
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a -f
@@ -211,11 +228,11 @@ jobs:
         echo "${{ inputs.extra_packages }}"
         echo "=========================================="
 
-        # 鎻愬彇绯荤粺璁剧疆鍙傛暟锛坃_ip__ 鍜?__hostname__ 鍓嶇紑锛?        RAW='${{ inputs.extra_packages }}'
+        # 鎻愬彇绯荤粺璁剧疆鍙傛暟锛坃_ip__ �?__hostname__ 鍓嶇紑锛?        RAW='${{ inputs.extra_packages }}'
         CUSTOM_IP=$(echo "$RAW" | grep -oP '(?<=__ip__)[^,\s]+' || true)
         CUSTOM_HOSTNAME=$(echo "$RAW" | grep -oP '(?<=__hostname__)[^,\s]+' || true)
 
-        # 搴旂敤鑷畾涔?IP
+        # 搴旂敤鑷畾�?IP
         if [ -n "$CUSTOM_IP" ]; then
           echo "馃寪 璁剧疆绠＄悊 IP: $CUSTOM_IP"
           sed -i "s/192\.168\.1\.1/$CUSTOM_IP/g" package/base-files/files/bin/config_generate
@@ -223,7 +240,7 @@ jobs:
 
         # 搴旂敤鑷畾涔変富鏈哄悕
         if [ -n "$CUSTOM_HOSTNAME" ]; then
-          echo "馃彿锔?璁剧疆涓绘満鍚? $CUSTOM_HOSTNAME"
+          echo "馃彿�?璁剧疆涓绘満�? $CUSTOM_HOSTNAME"
           sed -i "s/set system\.@system\[0\]\.hostname='ImmortalWrt'/set system.@system[0].hostname='$CUSTOM_HOSTNAME'/" package/base-files/files/bin/config_generate || true
           sed -i "s/option hostname 'ImmortalWrt'/option hostname '$CUSTOM_HOSTNAME'/" package/base-files/files/etc/config/system 2>/dev/null || true
         fi
@@ -232,8 +249,8 @@ jobs:
 
         # 妫€娴嬫槸鍚﹂€変簡 turboacc锛屽鏋滈€変簡鍒欏厛鎵ц瀹夎鑴氭湰
         if echo "$PACKAGES" | grep -qw "luci-app-turboacc"; then
-          echo "鈿?妫€娴嬪埌 luci-app-turboacc锛屾墽琛?turboacc 瀹夎鑴氭湰..."
-          curl -sSL https://raw.githubusercontent.com/mufeng05/turboacc/main/add_turboacc.sh -o add_turboacc.sh && bash add_turboacc.sh || echo "鈿狅笍 turboacc 鑴氭湰鎵ц澶辫触锛岃烦杩?
+          echo "�?妫€娴嬪�?luci-app-turboacc锛屾墽琛?turboacc 瀹夎鑴氭湰..."
+          curl -sSL https://raw.githubusercontent.com/mufeng05/turboacc/main/add_turboacc.sh -o add_turboacc.sh && bash add_turboacc.sh || echo "鈿狅�?turboacc 鑴氭湰鎵ц澶辫触锛岃烦杩?
         fi
 
         for pkg in $PACKAGES; do
@@ -241,19 +258,19 @@ jobs:
             CFG="CONFIG_PACKAGE_${pkg}"
             if grep -q "^# ${CFG} is not set" .config; then
               sed -i "s/^# ${CFG} is not set$/${CFG}=y/" .config
-              echo "鉁?Enabled (replaced): ${CFG}=y"
+              echo "�?Enabled (replaced): ${CFG}=y"
             elif grep -q "^${CFG}=" .config; then
               sed -i "s/^${CFG}=.*$/${CFG}=y/" .config
-              echo "鉁?Enabled (updated): ${CFG}=y"
+              echo "�?Enabled (updated): ${CFG}=y"
             else
               echo "${CFG}=y" >> .config
-              echo "鉁?Enabled (appended): ${CFG}=y"
+              echo "�?Enabled (appended): ${CFG}=y"
             fi
           fi
         done
         
         
-    - name: SSH 璋冭瘯鏈夋晥鏃堕棿6h! 杩炴帴鍚庤緭鍏 杈撳叆exit鍗冲彲閫€鍑猴紝鑷姩缁х画鍚庣画缂栬瘧娴佺▼
+    - name: SSH 璋冭瘯鏈夋晥鏃堕�?h! 杩炴帴鍚庤緭鍏 杈撳叆exit鍗冲彲閫€鍑猴紝鑷姩缁х画鍚庣画缂栬瘧娴佺▼
       uses: mxschmitt/action-tmate@master
       if: ${{ inputs.ssh || contains(github.event.action, 'ssh') }}
       
@@ -263,9 +280,9 @@ jobs:
       run: |
        cd openwrt
        make defconfig
-       # 寮哄埗闄嶇骇 GCC 鐗堟湰锛岄伩鍏?musl __REDIR 鍏煎鎬ч棶棰?       sed -i '/^CONFIG_GCC_VERSION=/d' .config
+       # 寮哄埗闄嶇骇 GCC 鐗堟湰锛岄伩�?musl __REDIR 鍏煎鎬ч棶棰?       sed -i '/^CONFIG_GCC_VERSION=/d' .config
        echo 'CONFIG_GCC_VERSION="15.2.0"' >> .config
-       # 绂佺敤 musl __REDIR 瀹忚Е鍙戠殑 implicit-int 閿欒
+       # 绂佺�?musl __REDIR 瀹忚Е鍙戠�?implicit-int 閿欒�?
        echo 'CONFIG_TARGET_CFLAGS="-Wno-error=implicit-int"' >> .config
        
     - name: Download package
@@ -276,15 +293,12 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: 鏌ョ湅 openwrt 鐩綍
-      run: ls -la openwrt/
-      
-           ls -l .config
-      
-           ls -la openwrt/.config
-
+      run: |
+        ls -la openwrt/
+        ls -l .config
+        ls -la openwrt/.config
  
-    - name: 鑷姩涓婁紶鏈€鏂版簮鐮佺敓鎴?config缂栬瘧閰嶇疆
+    - name: 鑷姩涓婁紶鏈€鏂版簮鐮佺敓�?config缂栬瘧閰嶇疆
       uses: actions/upload-artifact@main
       with:
        name: build-config
@@ -307,7 +321,7 @@ jobs:
 
     - name: Get kernel version
       run: |
-        KERNEL_VER=$(cat /mnt/openwrt/build_dir/target-*/linux-*/linux-*/.kernelversion 2>/dev/null | head -1 || echo "鏈煡")
+        KERNEL_VER=$(cat /mnt/openwrt/build_dir/target-*/linux-*/linux-*/.kernelversion 2>/dev/null | head -1 || echo "鏈�?)
         echo "KERNEL_VER=$KERNEL_VER" >> $GITHUB_ENV
 
 
@@ -333,47 +347,47 @@ jobs:
         rm -rf packages
         PROFILE=${{ github.event.inputs.profile }}
 
-        # 鍒涘缓鍒锋満鍖呯洰褰曞苟鎵撳寘 zip
+        # 鍒涘缓鍒锋満鍖呯洰褰曞苟鎵撳�?zip
         mkdir -p flash_package
         ZIP_NAME="OpenWrt_${PROFILE}${{ env.FILE_DATE }}_鍥轰欢鍖?zip"
 
-        # ===== 鎸?target 鍒嗘敮锛氳瘑鍒骇鐗╃被鍨?=====
-        # 楂橀€?msm8916 鈫?boot.img + system.img锛圓ndroid 鍒嗗尯闀滃儚锛?        # x86/64       鈫?combined.img / combined.vhdx / vmdk / qcow2锛圙RUB+grub2锛?        # ramips/mt7621鈫?*-squashfs-sysupgrade.bin锛圲-Boot/NAND sysupgrade锛?        BOOT_IMG=$(ls *boot.img.gz *boot.img 2>/dev/null | head -1)
+        # ===== �?target 鍒嗘敮锛氳瘑鍒骇鐗╃被�?=====
+        # 楂橀�?msm8916 �?boot.img + system.img锛圓ndroid 鍒嗗尯闀滃儚�?        # x86/64       �?combined.img / combined.vhdx / vmdk / qcow2锛圙RUB+grub2�?        # ramips/mt7621�?*-squashfs-sysupgrade.bin锛圲-Boot/NAND sysupgrade�?        BOOT_IMG=$(ls *boot.img.gz *boot.img 2>/dev/null | head -1)
         SYSTEM_IMG=$(ls *system.img.gz *system.img 2>/dev/null | head -1)
 
         if [ -n "$BOOT_IMG" ] && [ -n "$SYSTEM_IMG" ]; then
-          # ---------- 楂橀€?msm8916锛歜oot + system.img 鍒锋満鍖?----------
+          # ---------- 楂橀�?msm8916锛歜oot + system.img 鍒锋満�?----------
           echo "PACKAGE_TYPE=qualcomm-boot-system" >> $GITHUB_ENV
-          echo ">>> 妫€娴嬪埌楂橀€?msm8916 浜х墿锛歜oot.img + system.img"
+          echo ">>> 妫€娴嬪埌楂橀�?msm8916 浜х墿锛歜oot.img + system.img"
           cp "$BOOT_IMG" flash_package/boot.img.gz
           cp "$SYSTEM_IMG" flash_package/system.img.gz
-          # 瑙ｅ帇渚涘埛鏈鸿剼鏈娇鐢?          gzip -dk flash_package/boot.img.gz
+          # 瑙ｅ帇渚涘埛鏈鸿剼鏈娇�?          gzip -dk flash_package/boot.img.gz
           gzip -dk flash_package/system.img.gz
           rm flash_package/boot.img.gz flash_package/system.img.gz
-          cp -r $GITHUB_WORKSPACE/鍒锋満鑴氭湰/. flash_package/
-          # 纭繚 bat 鏂囦欢鏄?CRLF 鎹㈣锛圵indows 鍏煎锛?          unix2dos flash_package/*.bat 2>/dev/null || sed -i 's/\r//' flash_package/*.bat && sed -i 's/$/\r/' flash_package/*.bat
+          cp -r $GITHUB_WORKSPACE/鍒锋満鑴氭�?. flash_package/
+          # 纭�?bat 鏂囦欢鏄?CRLF 鎹㈣锛圵indows 鍏煎锛?          unix2dos flash_package/*.bat 2>/dev/null || sed -i 's/\r//' flash_package/*.bat && sed -i 's/$/\r/' flash_package/*.bat
         else
-          # ---------- x86/64 涓?ramips锛氶€氱敤鍥轰欢鍖咃紙涓嶈繃婊わ紝鍏ㄩ噺浜х墿锛?----------
-          echo ">>> 闈為珮閫氫骇鐗╋紝閲囩敤閫氱敤鍥轰欢鍖咃紙x86/64 鎴?ramips锛?
-          # 鏀堕泦鎵€鏈夊浐浠朵骇鐗╀笌缂栬瘧淇℃伅锛屾帓闄?packages/ 瀛愮洰褰?          for f in $(ls -1 | grep -vE '^packages$'); do
+          # ---------- x86/64 �?ramips锛氶€氱敤鍥轰欢鍖咃紙涓嶈繃婊わ紝鍏ㄩ噺浜х墿�?----------
+          echo ">>> 闈為珮閫氫骇鐗╋紝閲囩敤閫氱敤鍥轰欢鍖咃紙x86/64 �?ramips�?
+          # 鏀堕泦鎵€鏈夊浐浠朵骇鐗╀笌缂栬瘧淇℃伅锛屾帓�?packages/ 瀛愮洰褰?          for f in $(ls -1 | grep -vE '^packages$'); do
             [ -f "$f" ] && cp -p "$f" flash_package/
           done
-          # 楂橀€氬埛鏈鸿剼鏈粎閫傜敤浜?msm89xx锛屽叾浠?target 涓嶆墦鍖?          if [ -d "$GITHUB_WORKSPACE/鍒锋満鑴氭湰" ]; then
-            echo ">>> 璺宠繃鍒锋満鑴氭湰锛堥潪楂橀€?target锛?
+          # 楂橀€氬埛鏈鸿剼鏈粎閫傜敤�?msm89xx锛屽叾浠?target 涓嶆墦鍖?          if [ -d "$GITHUB_WORKSPACE/鍒锋満鑴氭�? ]; then
+            echo ">>> 璺宠繃鍒锋満鑴氭湰锛堥潪楂橀�?target�?
           fi
-          # 鏍￠獙锛氬繀椤昏嚦灏戞湁涓€涓浐浠朵骇鐗?          COUNT=$(ls -1 flash_package | wc -l)
+          # 鏍￠獙锛氬繀椤昏嚦灏戞湁涓€涓浐浠朵骇�?          COUNT=$(ls -1 flash_package | wc -l)
           if [ "$COUNT" -eq 0 ]; then
-            echo "::error::鍥轰欢鏂囦欢鏈壘鍒帮紝缂栬瘧鍙兘澶辫触锛佸綋鍓嶇洰褰曟枃浠讹細"
+            echo "::error::鍥轰欢鏂囦欢鏈壘鍒帮紝缂栬瘧鍙兘澶辫触锛佸綋鍓嶇洰褰曟枃浠讹�?
             ls -la
             exit 1
           fi
-          echo ">>> 宸叉敹闆?$COUNT 涓浐浠朵骇鐗?
+          echo ">>> 宸叉敹闆?$COUNT 涓浐浠朵骇�?
           ls -lh flash_package
         fi
 
         cd flash_package && zip -r "../$ZIP_NAME" . && cd ..
 
-        # 鏁寸悊 release 鐩綍锛歾ip + 鍗曠嫭鍥轰欢 + 缂栬瘧淇℃伅
+        # 鏁寸�?release 鐩綍锛歾ip + 鍗曠嫭鍥轰欢 + 缂栬瘧淇℃伅
         mkdir -p release_files
         mv "$ZIP_NAME" release_files/
         cp *.manifest release_files/ 2>/dev/null || true
@@ -406,24 +420,24 @@ jobs:
         echo "release_tag=$(date +"%Y.%m.%d-%H%M")-${PROFILE}" >> $GITHUB_OUTPUT
         touch release.txt
         {
-          echo "## Immortalwrt master鍒嗘敮 路 ${PROFILE}"
+          echo "## Immortalwrt master鍒嗘�?�?${PROFILE}"
           echo ""
-          echo "| 椤圭洰 | 淇℃伅 |"
+          echo "| 椤圭�?| 淇℃�?|"
           echo "|------|------|"
           echo "| 缂栬瘧鑰?| ${{ github.actor }} |"
-          echo "| 鏈哄瀷 | ${PROFILE} |"
+          echo "| 鏈哄�?| ${PROFILE} |"
           echo "| 鍐呮牳鐗堟湰 | ${{ env.KERNEL_VER }} |"
           echo "| 绠＄悊鍦板潃 | ${DISPLAY_IP} |"
-          echo "| 涓绘満鍚?| ${DISPLAY_HOSTNAME} |"
+          echo "| 涓绘満�?| ${DISPLAY_HOSTNAME} |"
           echo "| 榛樿鐢ㄦ埛 | root |"
-          echo "| 榛樿瀵嗙爜 | 绌?|"
+          echo "| 榛樿瀵嗙�?| �?|"
           echo ""
           if [ -n "$EXTRA" ]; then
-            echo "### 棰濆娣诲姞鐨勫寘"
+            echo "### 棰濆娣诲姞鐨勫�?
             echo "$EXTRA" | sed 's/^/- /'
           else
-            echo "### 棰濆娣诲姞鐨勫寘"
-            echo "鏃?
+            echo "### 棰濆娣诲姞鐨勫�?
+            echo "�?
           fi
         } >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
@@ -482,3 +496,4 @@ jobs:
               "https://api.github.com/repos/${{ github.repository }}/actions/runs/$run_id"
           done
         fi
+
