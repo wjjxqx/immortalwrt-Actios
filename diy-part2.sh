@@ -73,3 +73,4 @@ if [[ "${PROFILE}" == "hyperv" ]]; then
     sed -i '/CONFIG_PACKAGE_luci-i18n-tailscale-zh-cn/d' .config
     sed -i '/CONFIG_PACKAGE_luci-i18n-tailscale-zh-tw/d' .config
 fi
+#!/bin/bash  echo echo "diy-part2.sh executed" 
